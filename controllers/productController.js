@@ -106,7 +106,8 @@ exports.getAllProduct = async (req, res, next) => {
                 price: element.price,
                 spec: element.spec,
                 img: "http://localhost:3000"+'/images/'+element.img,
-                number : element.number
+                number : element.number,
+                date: element.date
             }
         })
     

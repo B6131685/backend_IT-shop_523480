@@ -7,7 +7,8 @@ const productSchema = new Schema({
     typeSpecs:{ type: Schema.Types.ObjectId, ref:specs, required:true},    
     spec: [],
     img: {type: String, default: 'nopic.png'},
-    number: {type: Number, default: 0}
+    number: {type: Number, default: 0},
+    date: {type:Date, default: Date.now } 
   },{
       collection: 'products'
   });
