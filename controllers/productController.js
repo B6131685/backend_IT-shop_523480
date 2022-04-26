@@ -1,5 +1,5 @@
 const Product = require('../models/product');
-
+const specs = require('../models/spec')
 //for write image
 const fs = require('fs');
 const path = require('path');
@@ -31,6 +31,7 @@ exports.addProduct = async function(req, res ,next){
 
 
         let product = new Product();
+        product.typeSpecs = req.body.typespec;
         product.price = req.body.price;
         product.spec = req.body.spec;
         if(req.body.img){
@@ -89,21 +90,31 @@ function decodeBase64Image(base64Str) {
 exports.getAllProduct = async (req, res, next) => {
     try {
         //const menu = await Menu.find();
-    const product = await Product.find();
-
-    const productWithPhotoDomain = await product.map( (element, index)=> {
-        return {
-            id: element._id,
-            price: element.price,
-            spec: element.spec,
-            img: "http://localhost:3000"+'/images/'+element.img,
-            number : element.number
+    await Product
+    .find()
+    .populate('typeSpecs')
+    .exec((err, type)=>{
+        if(err){ 
+            throw new Error(err)
         }
-    })
-     
-    res.status(200).json({
-        data: productWithPhotoDomain
-    })
+        // console.log(type);
+        const productWithPhotoDomain = type.map( (element, index)=> {
+            // console.log(element);
+            return {
+                id: element._id,
+                type: element.typeSpecs,
+                price: element.price,
+                spec: element.spec,
+                img: "http://localhost:3000"+'/images/'+element.img,
+                number : element.number
+            }
+        })
+    
+        res.status(200).json({
+            data: productWithPhotoDomain
+        })
+    });
+    // console.log(product);
     } catch (error) {
       next(error);  
     }
