@@ -255,5 +255,27 @@ exports.updateByOne = async (req, res, next) => {
             message: "Can not update"
         })
     }
+ }
 
+ exports.destroy = async (req, res, next) => {
+    try {
+     const id  = req.params._id;
+     console.log('req.params = '+id);
+     const spec = await Product.deleteOne({ _id: id});
+ 
+     if( spec.deletedCount === 0){
+         throw new Error('Not found information ro NOT permission')
+     }
+ 
+     res.status(201).json({
+         data: { message: "Delete success"}
+      })
+ 
+    } catch (error) {
+       res.status(400).json({ 
+           error: {
+               message: "ERROR" + error.message
+           }
+       }) 
+    }
  }
