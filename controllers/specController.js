@@ -1,4 +1,5 @@
 const Spec = require('../models/spec');
+const Product = require('../models/product')
 
 exports.addSpecs = async function(req, res ,next){
     try {
@@ -65,6 +66,36 @@ exports.destroy = async (req, res, next) => {
        res.status(400).json({ 
            error: {
                message: "ERROR" + error.message
+           }
+       }) 
+    }
+ }
+
+ exports.destroyMany = async (req, res, next) => {
+    try {
+     const id  = req.params._id;
+     console.log('req.params = '+id);
+     const spec = await Spec.deleteOne({ _id: id});
+
+     const product = await Product.deleteMany({typeSpecs: id})
+     
+    console.log(product.deletedCount);
+     if( spec.deletedCount === 0){
+         throw new Error('Not found information ro NOT permission')
+     }
+
+    //  if( product.deletedCount === 0){
+    //     throw new Error('Not found information ro NOT permission')
+    // }
+ 
+     res.status(201).json({
+         data: { message: "Delete success"}
+      })
+ 
+    } catch (error) {
+       res.status(400).json({ 
+           error: {
+               message: "ERROR " + error.message
            }
        }) 
     }
