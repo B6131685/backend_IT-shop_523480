@@ -126,7 +126,7 @@ exports.getProductByID = async (req, res, next) => {
     try {
         //const menu = await Menu.find();
     const id  = req.params._id;
-    console.log('req.params = '+id);
+    // console.log('req.params = '+id);
     // console.log(req.param._id.value);    
     await Product
     .findOne({_id:id})
@@ -137,7 +137,7 @@ exports.getProductByID = async (req, res, next) => {
                 data: "error"
             })
         }
-        console.log(type);
+        // console.log(type);
         res.status(200).json({
             
                 id: type._id,
@@ -158,7 +158,7 @@ exports.getProductByID = async (req, res, next) => {
 
 exports.updateProductStock = async (req, res ,next) => {
     try {
-    console.log(req.body);
+    // console.log(req.body);
     const {id, mode, number } = req.body; // ทำ object destructuring
 
     const product = await Product.findOne({ _id: req.body.id })
@@ -259,10 +259,26 @@ exports.updateByOne = async (req, res, next) => {
 
  exports.destroy = async (req, res, next) => {
     try {
+
+     //หา path จริงของโปรเจค
+    const projectPath = path.resolve('./') ;
+    //โฟลเดอร์ที่ภาพอยู่ใน ตัวโปรเจค path 
+    const uploadPath = `${projectPath}/public/images/`;   
+
      const id  = req.params._id;
-     console.log('req.params = '+id);
+     const obj = await Product.findOne({_id:id})
+    if (obj.img != 'nopic.png') {
+        
+        fs.unlink(uploadPath+obj.img, function (err) {
+            if (err) throw new Error('ไม่สามารถลบรูปภาพของ product ที่ต้องการลบได้');
+            // if no error, file has been deleted successfully
+            console.log('File deleted!');
+        });
+    }    
+    //  console.log('req.params = '+id);
      const spec = await Product.deleteOne({ _id: id});
- 
+     
+     
      if( spec.deletedCount === 0){
          throw new Error('Not found information ro NOT permission')
      }

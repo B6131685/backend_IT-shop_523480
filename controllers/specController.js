@@ -104,12 +104,25 @@ exports.destroy = async (req, res, next) => {
  exports.updateByOne = async (req, res, next) => {
 
     try {
-        console.log(req.params.id);
-        console.log("||"); 
+        // console.log(req.params.id);
         console.log(req.body); 
-        console.log("||"); 
+        const find = await Spec.findOne({_id: req.params._id})
+
+        let difference=[];
+        if(find){
+            difference = req.body.spec.filter(x => !find.spec.includes(x));
+            console.log(difference);
+        }
+
+        if(difference.length > 0){
+            const product = await Product.find({typeSpecs:req.params._id})
+
+            if(product){
+                console.log(product);
+            }
+        }
+
         const staff = await Spec.findOneAndUpdate({_id : req.params._id}, req.body);
-        console.log('respone');
         console.log(staff);
 
         res.status(201).json({

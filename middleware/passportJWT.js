@@ -11,7 +11,7 @@ opts.secretOrKey = 'FBF852F950F0A6A3210771C9622D74CD686D472C11A975DB7FEAE7EC6628
 passport.use(new JwtStrategy(opts, async function(jwt_payload, done) {
     
     try {
-        // console.log(jwt_payload.id);
+        console.log(jwt_payload);
         const user =  await User.findOne({ _id:jwt_payload.id});
         if(!user){
             return done(new Error('ไม่พบผู้ใช้งาน',null));
