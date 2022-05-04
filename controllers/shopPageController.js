@@ -8,6 +8,7 @@ const path = require('path');
 const uuidv4 = require('uuid');
 const { promisify } = require('util');
 const e = require('express');
+const shopPage = require('../models/shopPage');
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 
@@ -156,3 +157,26 @@ exports.destroy = async (req, res, next) => {
  }
 
 
+ exports.editNameShop = async (req, res, next) => {
+    try {
+
+    data = await shopPage.findOne();
+
+    console.log(req.body.newName);
+    
+    data.nameShop = req.body.newName;
+
+    let result = await data.save();
+
+    res.status(201).json({
+        data: { message: result}
+     })
+    
+    } catch (error) {
+       res.status(400).json({ 
+           error: {
+               message: "ERROR" + error.message
+           }
+       }) 
+    }
+ }
