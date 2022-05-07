@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const Verification = require('../models/verify');
+const Cart = require('../models/carts')
 
 const transport = nodemailer.createTransport( {
     host: "smtp.gmail.com",
@@ -43,11 +44,12 @@ register = async function(req, res, next){
             error.statusCode = 400;
             throw error;
         }
-
+        let cart = new Cart();
+        await cart.save()
         let user = new User();
         user.name = req.body.name;
         user.email = req.body.email;
-        
+        user.cart = cart._id;
         user.password = await user.encryptPassword(req.body.password);
 
         let aftersave = await user.save()

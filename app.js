@@ -17,6 +17,7 @@ const specsRouter = require('./routes/specs');
 const verifyRouter = require('./routes/verify');
 const productRouter = require('./routes/product')
 const shopPageRouter = require('./routes/shopPage')
+const cartRouter = require('./routes/cart')
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use('/specs', specsRouter);
 app.use('/verify', verifyRouter);
 app.use('/product', productRouter);
 app.use('/shopPage', shopPageRouter);
+app.use('/cart', cartRouter);
 
 app.use(errorHandler);
 
