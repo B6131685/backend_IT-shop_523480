@@ -18,7 +18,7 @@ const transport = nodemailer.createTransport( {
 
 
 
-exports.register = async function(req, res, next){
+register = async function(req, res, next){
 
     try {
 
@@ -49,8 +49,6 @@ exports.register = async function(req, res, next){
         user.email = req.body.email;
         
         user.password = await user.encryptPassword(req.body.password);
-        user.location = req.body?.address;
-        user.cart = req.body?.cart;
 
         let aftersave = await user.save()
         .then()
@@ -105,7 +103,7 @@ exports.register = async function(req, res, next){
 
 
 
-exports.login = async function(req, res, next){
+login = async function(req, res, next){
     try {
         // console.log(req.body);
         const {email, password} = req.body;
@@ -157,18 +155,40 @@ exports.login = async function(req, res, next){
 }
 
 
-exports.me = async function(req, res, next) {
+me = async function(req, res, next) {
     try {
 
-        // console.log(req);
-        // console.log(req.body.role);
-        console.log(req.body);
-        res.status(200).json({ data: "get me success"});
+        console.log(req.params.id);
+        
+        const user = await User.findOne({_id:req.params.id})
+        res.status(200).json({ data: user});
     } catch (error) {
         console.log(error);
         res.status(400).json({ data: "ERROR"});
     }
     
+}
+
+editProfile = async function(req, res, next){
+    try {
+        console.log('edit Profile working');
+        console.log(req.body);
+
+        const user = await User.findOne({_id:req.body._id})
+        user.location = req.body.location;
+        user.name = req.body.name;
+        await user.save();
+        res.status(200).json({ msg: 'edit success user'});
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = {
+    me,
+    login,
+    register,
+    editProfile
 }
 
 

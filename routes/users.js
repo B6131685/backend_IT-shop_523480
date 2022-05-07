@@ -12,6 +12,7 @@ router.post('/register', [
 
 router.post('/login',userController.login);
 
-router.post('/me',[paassportJWT.isLogin] ,userController.me);
+router.get('/me/:id',[paassportJWT.isLogin] ,userController.me);
+router.put('/editProfile',[paassportJWT.isLogin] ,userController.editProfile);
 
 module.exports = router;

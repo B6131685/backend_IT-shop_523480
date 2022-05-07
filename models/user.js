@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const bcrypt = require('bcryptjs');
-
+const cart = require('./carts')
 const userSchema = new Schema({
     name: {type: String, required:true, trim: true}, 
     email: { type: String, required: true, trim: true, unique: true, index: true},
     verify: {type: Boolean, default: false},
     password: { type: String, required: true, trim:true, minlength: 3},
     location: [
-      
+      {postcode: {type: Number, require: true}, area: {type: String, require: true}, address: {type: String, require: true} }
     ],
     mainlocation: {type : Number, default: 0},
-    cart : {type : String},
+    cart : {type: Schema.Types.ObjectId, ref: cart},
     role: { type: String, default: 'customer'}
   },{
       collection: 'users'
