@@ -160,7 +160,7 @@ login = async function(req, res, next){
 me = async function(req, res, next) {
     try {
 
-        console.log(req.params.id);
+        // console.log(req.params.id);
         
         const user = await User.findOne({_id:req.params.id})
         res.status(200).json({ data: user});

@@ -123,7 +123,7 @@ function decodeBase64Image(base64Str) {
 
 exports.destroy = async (req, res, next) => {
     try {
-     console.log(req.body);
+    //  console.log(req.body);
      //หา path จริงของโปรเจค
     const projectPath = path.resolve('./') ;
     //โฟลเดอร์ที่ภาพอยู่ใน ตัวโปรเจค path 
