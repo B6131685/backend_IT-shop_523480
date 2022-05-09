@@ -3,6 +3,7 @@ const User = require('../models/user');
 
 //path for static veridied page
 const path = require("path");
+// const user = require('../models/user');
 
 
 exports.verifyUser = async function(req, res ,next){
@@ -27,7 +28,7 @@ exports.verifyUser = async function(req, res ,next){
                 throw error;
             }
 
-            let data = Verification.deleteOne({_id:existVerification._id.toString()});
+            let data = await Verification.deleteOne({_id:existVerification._id.toString()});
             if(!data){
                 console.log("หลังจากการยืนยันอีเมลของสมาชิกได้ถูกยืนยัน แต่ไม่สามารถลบข้อมูล verification ของสามารถชิกได้ได้ ");
             }
@@ -39,5 +40,23 @@ exports.verifyUser = async function(req, res ,next){
 
     } catch (error) {
         next(error);
+    }
+}
+
+exports.verifyNewEmail = async function(req, res ,next){
+    try {
+        // console.log('verify New Email Working!!!');
+        // console.log(req.params.uniqueString);
+        verify = await Verification.findOne({uniqueString:req.params.uniqueString});
+        // console.log(verify);
+        user = await User.findOne({_id:verify.userID});
+        console.log(user);
+        user.email = verify.email;
+        await user.save();
+
+        await Verification.deleteOne({uniqueString:req.params.uniqueString});
+        res.status(200).json({ msg: 'verify NewEmail success'});
+    } catch (error) {
+        next(error)
     }
 }

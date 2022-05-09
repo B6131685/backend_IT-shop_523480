@@ -14,5 +14,6 @@ router.post('/login',userController.login);
 
 router.get('/me/:id',[paassportJWT.isLogin] ,userController.me);
 router.put('/editProfile',[paassportJWT.isLogin] ,userController.editProfile);
+router.put('/changeEmail',[paassportJWT.isLogin] ,userController.changeEmail);
 
 module.exports = router;

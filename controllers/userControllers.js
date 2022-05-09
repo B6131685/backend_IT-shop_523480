@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const Verification = require('../models/verify');
 const Cart = require('../models/carts')
-
+const uuidv4 = require('uuid');
 const transport = nodemailer.createTransport( {
     host: "smtp.gmail.com",
     port: 587,
@@ -81,7 +81,7 @@ register = async function(req, res, next){
             from: "wolfsuperdog77@gmail.com",
             to: "",
             subject: "verify IT Shop",
-            html: `<p>Verify your email address to complete the singup and login your account.</p>
+            html: `<p>Verify your email address to complete the singup.</p>
                     <p>this link </p> <p><a href=${"http://localhost:3000/verify/"+aftersave._id.toString()}>Press</a></p>`
         }
 
@@ -186,11 +186,51 @@ editProfile = async function(req, res, next){
     }
 }
 
+changeEmail = async function(req, res, next){
+    try {
+        console.log('change email working');
+
+        console.log(req.body); //{email:'', UserID:''}
+        uniqueString = uuidv4.v4();
+
+        let verify = new Verification();
+        verify.userID = req.body.userID;
+        verify.uniqueString = uniqueString;
+        verify.email = req.body.email
+        
+        // let aftersave = await verify.save();
+        let options = {
+            from: "wolfsuperdog77@gmail.com",
+            to: "",
+            subject: "verify IT Shop",
+            html: `<p>Verify your new email address to complete Email changing .</p>
+                    <p>this link </p> <p><a href=${"http://localhost:3000/verify/verifyNewEmail/"+verify.uniqueString}>Press</a></p>`
+        }
+
+        options.to = req.body.email;
+
+        transport.sendMail(options, (err, info)=>{
+            if(err){
+                console.log(err);
+                const error = new Error('การส่งเมลเกิดข้อผิดพลาด');
+                error.statusCode = 400;
+                throw error;
+            }
+        })
+
+        let aftersaveverify = await verify.save()
+        res.status(200).json({ msg: 'send verify new Email'});
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     me,
     login,
     register,
-    editProfile
+    editProfile,
+    changeEmail,
 }
 
 

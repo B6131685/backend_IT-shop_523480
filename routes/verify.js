@@ -4,8 +4,6 @@ const verifyController = require('../controllers/verifyController');
 
 
 router.get('/:id',verifyController.verifyUser);
-// router.get('/:id',()=>{
-//     console.log(req.params.uniqueString);
-// });
+router.get('/verifyNewEmail/:uniqueString',verifyController.verifyNewEmail);
 
 module.exports = router;
