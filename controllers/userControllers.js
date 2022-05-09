@@ -173,8 +173,8 @@ me = async function(req, res, next) {
 
 editProfile = async function(req, res, next){
     try {
-        console.log('edit Profile working');
-        console.log(req.body);
+        // console.log('edit Profile working');
+        // console.log(req.body);
 
         const user = await User.findOne({_id:req.body._id})
         user.location = req.body.location;
@@ -188,9 +188,9 @@ editProfile = async function(req, res, next){
 
 changeEmail = async function(req, res, next){
     try {
-        console.log('change email working');
+        // console.log('change email working');
 
-        console.log(req.body); //{email:'', UserID:''}
+        // console.log(req.body); //{email:'', UserID:''}
         uniqueString = uuidv4.v4();
 
         let verify = new Verification();
@@ -225,12 +225,44 @@ changeEmail = async function(req, res, next){
     }
 }
 
+changePassword = async function(req, res, next){
+    try {
+        console.log('changePaasword working!!!');
+        // Expect req.body = {oldPassword:String,newPassword:String,userID:String};
+        console.log(req.body);
+
+        user = await User.findOne({_id:req.body.userID})
+        console.log(user);
+        if(!user){
+            const error = new Error('เกิดข้อผิดพลาดไม่พบ user'); 
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if(user){
+            if(user.checkPassword(req.body.oldPassword)){
+                user.password = await user.encryptPassword(req.body.newPassword);
+                await user.save();
+            }else{
+                const error = new Error('รหัสผ่านปัจจุบันไม่ถูกต้อง'); 
+                error.statusCode = 400;
+                throw error;
+            }
+        }
+        
+        res.status(200).json({ msg: 'password is changed'});
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     me,
     login,
     register,
     editProfile,
     changeEmail,
+    changePassword
 }
 
 
