@@ -229,25 +229,43 @@ changePassword = async function(req, res, next){
     try {
         console.log('changePaasword working!!!');
         // Expect req.body = {oldPassword:String,newPassword:String,userID:String};
-        console.log(req.body);
+        // console.log(req.body);
 
         user = await User.findOne({_id:req.body.userID})
-        console.log(user);
+        // console.log(user);
         if(!user){
             const error = new Error('เกิดข้อผิดพลาดไม่พบ user'); 
             error.statusCode = 400;
             throw error;
         }
 
+
+        // console.log( await user.checkPassword(req.body.oldPassword));
         if(user){
-            if(user.checkPassword(req.body.oldPassword)){
-                user.password = await user.encryptPassword(req.body.newPassword);
-                await user.save();
-            }else{
+            
+            let checkPassword =  await user.checkPassword(req.body.oldPassword)
+            // if( await user.checkPassword(req.body.oldPassword)){
+            //     user.password = await user.encryptPassword(req.body.newPassword);
+            //     await user.save();
+            // }else{
+            //     const error = new Error('รหัสผ่านปัจจุบันไม่ถูกต้อง'); 
+            //     error.statusCode = 400;
+            //     throw error;
+            // }
+            if(!checkPassword){
                 const error = new Error('รหัสผ่านปัจจุบันไม่ถูกต้อง'); 
                 error.statusCode = 400;
                 throw error;
             }
+
+            if(req.body.newPassword === ''){
+                const error = new Error('ไม่อนุญาติให้รหัสเป็นค่าว่าง'); 
+                error.statusCode = 400;
+                throw error;
+            }
+
+            user.password = await user.encryptPassword(req.body.newPassword);
+            await user.save();
         }
         
         res.status(200).json({ msg: 'password is changed'});
