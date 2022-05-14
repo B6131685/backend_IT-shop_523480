@@ -163,9 +163,13 @@ exports.destroy = async (req, res, next) => {
     data = await shopPage.findOne();
 
     console.log(req.body.newName);
-    
-    data.nameShop = req.body.newName;
+    console.log(req.body.shipping);
+    console.log(req.body.cost_shipping);
 
+
+    data.nameShop = req.body.newName;
+    data.shipping = req.body.shipping;
+    data.cost_shipping = req.body.cost_shipping;    
     let result = await data.save();
 
     res.status(201).json({
