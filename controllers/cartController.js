@@ -1,6 +1,6 @@
 const Cart = require('../models/carts')
 const User = require('../models/user')
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 updateQuantityProduct = async function(req, res, next){
     try {

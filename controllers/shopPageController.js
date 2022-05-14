@@ -162,9 +162,9 @@ exports.destroy = async (req, res, next) => {
 
     data = await shopPage.findOne();
 
-    console.log(req.body.newName);
-    console.log(req.body.shipping);
-    console.log(req.body.cost_shipping);
+    // console.log(req.body.newName);
+    // console.log(req.body.shipping);
+    // console.log(req.body.cost_shipping);
 
 
     data.nameShop = req.body.newName;
