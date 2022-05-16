@@ -4,5 +4,7 @@ const orderController = require('../controllers/orderController');
 const paassportJWT = require('../middleware/passportJWT');
 
 router.post('/addOrder',orderController.addOrder);
+router.post('/getOrderNotslip',orderController.getOrderNotSlip);
+router.put('/updateSlip',orderController.updateSlip);
 
 module.exports = router;

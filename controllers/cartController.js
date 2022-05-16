@@ -1,5 +1,5 @@
-const Cart = require('../models/carts')
-const User = require('../models/user')
+const Cart = require('../models/carts');
+const User = require('../models/user');
 const mongoose = require('mongoose');
 
 updateQuantityProduct = async function(req, res, next){
@@ -40,7 +40,7 @@ updateQuantityProduct = async function(req, res, next){
 
 }
 
-getCartByID = async function(req, res, next){
+getCartByIDUser = async function(req, res, next){
     try {
         let {idUser} = req.body;
         const user = await User.findOne({_id:idUser});
@@ -63,6 +63,30 @@ getCartByID = async function(req, res, next){
                                 })
         
         
+    } catch (error) {
+        next(error)
+    }
+}
+
+getManyCartByIDCart = async function(req, res, next){
+    try {
+        await Cart.findOne({_id:req.params.id})
+                    .populate('list.idProduct')
+                    .exec((err,item)=>{
+                        if(err){ 
+                            throw new Error(err)
+                        }
+                        
+                        // console.log(item.list.length); 
+                        //find and findOne have difference  ... data that return form find() cannot use .length 
+                        for (let index = 0; index < item.list.length; index++) {
+                            // console.log(item.list[index].idProduct.img);
+                            item.list[index].idProduct.img = "http://localhost:3000"+'/images/'+ item.list[index].idProduct.img;
+                        
+                        }
+                        res.status(200).json({ data: item });
+                    })
+
     } catch (error) {
         next(error)
     }
@@ -100,6 +124,7 @@ updateByReplaceCart  = async function(req, res, next){
 
 module.exports = {
     updateQuantityProduct,
-    getCartByID,
-    updateByReplaceCart
+    getCartByIDUser,
+    updateByReplaceCart,
+    getManyCartByIDCart
 }
