@@ -55,6 +55,32 @@ getOrderNotSlip = async function(req, res ,next){
     }
 }
 
+getOrderHaveSlip = async function(req, res ,next){
+    try {
+        console.log(req.body);
+        order = await Order.find({idUser:req.body.idUser,slipStatus: true})
+
+        const ordertWithPhotoDomain = order.map( (element, index)=> {
+            // console.log(element);
+            return {
+                _id: element._id,
+                address: element.address,
+                idTrackingprice: element.idTracking,
+                paymentStatus: element.paymentStatus,
+                slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
+                slipStatus : element.slipStatus,
+                idCart: element.idCart,
+                idUser: element.idUser,
+
+            }
+        })
+
+        res.status(200).json({ data: ordertWithPhotoDomain});
+    } catch (error) {
+        next(error)
+    }
+}
+
 updateSlip = async function(req, res ,next){
     try {
         // console.log(req.body.idOrder);
@@ -76,7 +102,7 @@ updateSlip = async function(req, res ,next){
             throw error;
         }
 
-        order = await Order.findOneAndUpdate({_id:req.body.idOrder},{slipVerification:img,slipStatus:true})
+        order = await Order.findOneAndUpdate({_id:req.body.idOrder},{slipVerification:img,slipStatus:true,address:req.body.address})
 
         console.log(order);
         
@@ -129,5 +155,6 @@ function decodeBase64Image(base64Str) {
 module.exports = {
     addOrder,
     getOrderNotSlip,
+    getOrderHaveSlip,
     updateSlip
 }
