@@ -1,5 +1,6 @@
 const Cart = require('../models/carts');
 const User = require('../models/user');
+const Product = require('../models/product')
 const mongoose = require('mongoose');
 
 updateQuantityProduct = async function(req, res, next){
@@ -13,21 +14,41 @@ updateQuantityProduct = async function(req, res, next){
         const cart = await Cart.findOne({_id:user.cart});
         // console.log(cart);
 
+
+
+
         for (let index = 0; index < cart.list.length; index++) {
             // console.log(cart.list[index].idProduct);
             // console.log(cart.list[index].idProduct === idProduct);  // false
             // console.log(cart.list[index].idProduct.toString() === idProduct); // true
+
+            let product = await Product.findOne({_id:idProduct})
             if(cart.list[index].idProduct.toString() === idProduct){
-                var id = mongoose.Types.ObjectId(idProduct);
-                cart.list[index].quantity += quantity
-                found = false
+                if(product.number >= (cart.list[index].quantity + quantity)){
+
+                    var id = mongoose.Types.ObjectId(idProduct);
+                    cart.list[index].quantity += quantity
+                    found = false
+                }else{
+                    const error = new Error('จำนวนสินค้าที่เพิ่มเข้าไปใหม่กับในตะกร้า เกิดลิมิต');
+                    error.statusCode = 400;
+                    throw error;
+                }
             }
             
 
         }
 
         if(found){
-            cart.list.push({'idProduct':idProduct,'quantity':quantity})
+            let product = await Product.findOne({_id:idProduct})
+            if(product.number >= quantity){
+
+                cart.list.push({'idProduct':idProduct,'quantity':quantity})
+            }else{
+                const error = new Error('จำนวนสินค้าที่เพิ่มเข้าไปใหม่เกิดลิมิต');
+                error.statusCode = 400;
+                throw error;
+            }
         }
 
         result = cart.list.filter(element => element.quantity > 0);

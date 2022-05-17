@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Order = require('../models/order');
 const User = require('../models/user');
 const Cart = require('../models/carts');
-
+const Product = require('../models/product');
 
 //for write image
 const fs = require('fs');
@@ -12,32 +12,58 @@ const { promisify } = require('util');
 const e = require('express');
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
+
 addOrder = async function(req, res ,next){
     try {
         console.log(req.body);
         let order = new Order();
         
+         
+        order.idCart = req.body.idCart;
+        order.idUser = req.body.idUser;
+
+        
+        checkCart = await Cart.findOne({_id:req.body.idCart}) 
+        console.log(checkCart);
+
+        //check
+        for (let index = 0; index < checkCart.list.length; index++) {
+            let product = await Product.findOne({_id:checkCart.list[index].idProduct})
+            // console.log(product);
+            if(checkCart.list[index].quantity > product.number){
+                console.log(product.spec[0].value+' : quantity-Cart geather than stock-Product');
+                const error = new Error('จำนวนสินค้าไม่สัมพันธ์กับปัจจุบัน');
+                error.statusCode = 400;
+                throw error;
+            }
+        }
+        
+        //cut order
+        for (let index = 0; index < checkCart.list.length; index++) {
+            let product = await Product.findOne({_id:checkCart.list[index].idProduct})
+            // console.log(product);
+            product.number = product.number - checkCart.list[index].quantity;
+            after =  await product.save();
+            // console.log(after);
+        }
+
         let cart = new Cart();
+        
         newcart = await cart.save();
         if(!newcart){
             const error = new Error('เกิดปัญหาไม่สามารถสร้างจะกร้าใหม้ได้');
             error.statusCode = 400;
             throw error;
         }
-        // console.log(newcart._id);
-        let user = await User.findOneAndUpdate({_id:req.body.idUser},{cart:newcart._id})
-        console.log(user);
+        await User.findOneAndUpdate({_id:req.body.idUser},{cart:newcart._id})
         if(!newcart){
             const error = new Error('เกิดปัญหาไม่สามารถเพิ่มตะกร้าใหม้ให้ลูกค้าได้');
             error.statusCode = 400;
             throw error;
         }
 
-        order.idCart = req.body.idCart;
-        order.idUser = req.body.idUser;
 
         aftersave = await order.save();
-        // console.log(aftersave);
         res.status(200).json({ message: "Order already saving"});
     } catch (error) {
         next(error)
@@ -59,6 +85,32 @@ getOrderHaveSlip = async function(req, res ,next){
     try {
         console.log(req.body);
         order = await Order.find({idUser:req.body.idUser,slipStatus: true})
+
+        const ordertWithPhotoDomain = order.map( (element, index)=> {
+            // console.log(element);
+            return {
+                _id: element._id,
+                address: element.address,
+                idTrackingprice: element.idTracking,
+                paymentStatus: element.paymentStatus,
+                slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
+                slipStatus : element.slipStatus,
+                idCart: element.idCart,
+                idUser: element.idUser,
+
+            }
+        })
+
+        res.status(200).json({ data: ordertWithPhotoDomain});
+    } catch (error) {
+        next(error)
+    }
+}
+
+getAllOrderHaveSlip = async function(req, res ,next){
+    try {
+        // console.log(req.body);
+        order = await Order.find()
 
         const ordertWithPhotoDomain = order.map( (element, index)=> {
             // console.log(element);
@@ -156,5 +208,6 @@ module.exports = {
     addOrder,
     getOrderNotSlip,
     getOrderHaveSlip,
-    updateSlip
+    updateSlip,
+    getAllOrderHaveSlip
 }
