@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const Verification = require('../models/verify');
 const Cart = require('../models/carts')
 const uuidv4 = require('uuid');
+// const user = require('../models/user');
 const transport = nodemailer.createTransport( {
     host: "smtp.gmail.com",
     port: 587,
@@ -274,13 +275,60 @@ changePassword = async function(req, res, next){
     }
 }
 
+
+forgotPassword = async function(req, res, next){
+    try {
+
+        // let aftersave = await verify.save();
+        
+        console.log(req.body);
+
+        newPassword =  Math.floor(100000 + Math.random() * 900000);
+
+        user = await User.findOne({email:req.body.email})
+
+        if(!user){
+                const error = new Error('อีเมลนี้ยังไม่ได้เป็นสมาชิก');
+                error.statusCode = 400;
+                throw error;
+        }
+
+        user.password = await user.encryptPassword(newPassword.toString());
+        await user.save();
+
+        let options = {
+            from: "IT SHop",
+            to: "",
+            subject: "new password",
+            html: `<p>new Password is ${newPassword}</p>`
+        }
+
+        options.to = req.body.email;
+
+        transport.sendMail(options, (err, info)=>{
+            if(err){
+                console.log(err);
+                const error = new Error('การส่งเมลเกิดข้อผิดพลาด');
+                error.statusCode = 400;
+                throw error;
+            }
+        })
+
+       res.status(200).json({ msg: newPassword});
+    } catch (error) {
+        next(error)
+    }
+}
+
+
 module.exports = {
     me,
     login,
     register,
     editProfile,
     changeEmail,
-    changePassword
+    changePassword,
+    forgotPassword
 }
 
 

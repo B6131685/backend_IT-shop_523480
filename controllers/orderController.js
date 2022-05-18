@@ -110,7 +110,7 @@ getOrderHaveSlip = async function(req, res ,next){
 getAllOrderHaveSlip = async function(req, res ,next){
     try {
         // console.log(req.body);
-        order = await Order.find()
+        order = await Order.find({slipStatus: true})
 
         const ordertWithPhotoDomain = order.map( (element, index)=> {
             // console.log(element);
