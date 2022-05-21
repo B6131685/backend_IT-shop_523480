@@ -10,8 +10,12 @@ const orderSchema = new Schema({
     address: { type: String, default:"not fill"}, // where 
     idTracking: { type: String, default: "not fill"}, // number express to follow product
     paymentStatus: { type: Boolean, default: false}, // admin verify slip
+    verify: { type: Boolean, default: false},
     slipVerification: {type: String, default: 'nopic.png'}, // slip img
-    slipStatus: {type: Boolean, default: false} // check user is attach slip yet
+    slipStatus: {type: Boolean, default: false}, // check user is attach slip yet
+    activeStatus: {type: Boolean, default: true}, //
+    shipping: {type: Number}, //shipping นะช่วงเวลานั้นๆที่ซื้อ  ถ้าไปดึงมาจาก ในอนาคตค่าอาจเปลี่ยน
+    date: {type:Date, default: Date.now } 
   },{
       collection: 'orders'
   });
