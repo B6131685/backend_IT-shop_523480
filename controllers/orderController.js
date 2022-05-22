@@ -10,6 +10,7 @@ const path = require('path');
 const uuidv4 = require('uuid');
 const { promisify } = require('util');
 const e = require('express');
+// const user = require('../models/user');
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 
@@ -73,8 +74,8 @@ addOrder = async function(req, res ,next){
 getOrderNotSlip = async function(req, res ,next){
     try {
         console.log(req.body);
-        order = await Order.find({idUser:req.body.idUser,slipStatus: false})
-
+        order = await Order.find({idUser:req.body.idUser,slipStatus: false, activeStatus:true})
+        console.log(order);
         res.status(200).json({ data: order});
     } catch (error) {
         next(error)
@@ -204,10 +205,66 @@ function decodeBase64Image(base64Str) {
 }
 
 
+cancleOrder = async function(req, res ,next){
+    try {
+        console.log(req.params.id);
+
+        await Order.findOneAndUpdate({_id:req.params.id}, {activeStatus:false});
+        
+        res.status(200).json({ mag : 'cancle order success'});
+    } catch (error) {
+        next(error)
+    }
+}
+
+getOrderNotActive = async function(req, res ,next){
+    try {
+        console.log(req.params.id);
+        user = await User.findOne({_id:req.params.id})
+        // console.log(user);
+
+        if(user.role === 'customer'){
+            order = await Order.find({idUser:req.params.id,activeStatus:false})
+            .populate({
+                path: 'idCart',
+                populate: {
+                    path: 'list.idProduct',
+                    model: 'Product'
+                }
+            })
+            .exec((err, type)=>{
+                if(err){ 
+                    res.status(400).json({
+                        data: "error"
+                    })
+                }
+                console.log(type);
+                res.status(200).json({
+                    
+                    data:type
+                })
+            });
+
+
+
+            // res.status(200).json({ data : order});
+        }else{
+            res.status(200).json({ data : []});
+        }
+
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+
 module.exports = {
     addOrder,
     getOrderNotSlip,
     getOrderHaveSlip,
     updateSlip,
-    getAllOrderHaveSlip
+    getAllOrderHaveSlip,
+    cancleOrder,
+    getOrderNotActive,
 }

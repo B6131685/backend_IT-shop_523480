@@ -8,5 +8,7 @@ router.post('/getOrderNotslip',orderController.getOrderNotSlip);
 router.put('/getOrderHaveslip',orderController.getOrderHaveSlip);
 router.get('/getAllOrderHaveslip',orderController.getAllOrderHaveSlip);
 router.put('/updateSlip',orderController.updateSlip);
+router.delete('/cancleOrder/:id',orderController.cancleOrder);
+router.get('/getOrderNotActive/:id',orderController.getOrderNotActive);
 
 module.exports = router;
