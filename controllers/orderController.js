@@ -74,8 +74,10 @@ addOrder = async function(req, res ,next){
 getOrderNotSlip = async function(req, res ,next){
     try {
         console.log(req.body);
-        order = await Order.find({idUser:req.body.idUser,slipStatus: false, activeStatus:true})
-        console.log(order);
+        order = await Order.find({idUser:req.body.idUser,slipStatus: false, activeStatus:true}) 
+
+
+        // console.log(order);
         res.status(200).json({ data: order});
     } catch (error) {
         next(error)
@@ -84,11 +86,11 @@ getOrderNotSlip = async function(req, res ,next){
 
 getOrderHaveSlip = async function(req, res ,next){
     try {
-        console.log(req.body);
+        
         order = await Order.find({idUser:req.body.idUser,slipStatus: true})
 
         const ordertWithPhotoDomain = order.map( (element, index)=> {
-            // console.log(element);
+            
             return {
                 _id: element._id,
                 address: element.address,
@@ -209,7 +211,19 @@ cancleOrder = async function(req, res ,next){
     try {
         console.log(req.params.id);
 
-        await Order.findOneAndUpdate({_id:req.params.id}, {activeStatus:false});
+         order = await Order.findOneAndUpdate({_id:req.params.id}, {activeStatus:false}); //อย่าลืมแก้กลับเป็น false
+
+        //นำสินค้าที่ยกเลิกบวกจำนวนที่จองกลับไปขายใหม้
+        // console.log(order);
+        cart = await Cart.findOne({_id:order.idCart})
+        // console.log(cart);
+
+        for (let index = 0; index < cart.list.length; index++) {
+             product = await Product.findOne({_id:cart.list[index].idProduct})
+             product.number += cart.list[index].quantity;
+             await product.save();
+        }
+
         
         res.status(200).json({ mag : 'cancle order success'});
     } catch (error) {
@@ -238,7 +252,7 @@ getOrderNotActive = async function(req, res ,next){
                         data: "error"
                     })
                 }
-                console.log(type);
+                // console.log(type);
                 res.status(200).json({
                     
                     data:type
