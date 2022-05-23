@@ -6,9 +6,13 @@ const paassportJWT = require('../middleware/passportJWT');
 router.post('/addOrder',orderController.addOrder);
 router.post('/getOrderNotslip',orderController.getOrderNotSlip);
 router.put('/getOrderHaveslip',orderController.getOrderHaveSlip);
-router.get('/getAllOrderHaveslip',orderController.getAllOrderHaveSlip);
-router.put('/updateSlip',orderController.updateSlip);
 router.delete('/cancleOrder/:id',orderController.cancleOrder);
+router.put('/updateSlip',orderController.updateSlip);
 router.get('/getOrderNotActive/:id',orderController.getOrderNotActive);
+
+//for admin
+router.get('/getAllOrderHaveslip',orderController.getAllOrderHaveSlip);
+router.put('/verifyPayment',orderController.verifyPayment);
+router.get('/trueVerifyPayment',orderController.getAllOrderHaveSlipAndVerifyTrue);
 
 module.exports = router;

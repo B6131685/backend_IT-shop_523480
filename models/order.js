@@ -15,7 +15,8 @@ const orderSchema = new Schema({
     slipStatus: {type: Boolean, default: false}, // check user is attach slip yet
     activeStatus: {type: Boolean, default: true}, //
     shipping: {type: Number}, //shipping นะช่วงเวลานั้นๆที่ซื้อ  ถ้าไปดึงมาจาก ในอนาคตค่าอาจเปลี่ยน
-    date: {type:Date, default: Date.now } 
+    createAt: {type:Date, default: Date.now }, //
+    updateAt: {type:Date, default: Date.now } //
   },{
       collection: 'orders'
   });

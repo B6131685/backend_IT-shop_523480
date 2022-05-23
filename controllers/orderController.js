@@ -10,6 +10,7 @@ const path = require('path');
 const uuidv4 = require('uuid');
 const { promisify } = require('util');
 const e = require('express');
+const { verify } = require('crypto');
 // const user = require('../models/user');
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
@@ -113,7 +114,33 @@ getOrderHaveSlip = async function(req, res ,next){
 getAllOrderHaveSlip = async function(req, res ,next){
     try {
         // console.log(req.body);
-        order = await Order.find({slipStatus: true})
+        order = await Order.find({slipStatus: true, activeStatus: true, verify:false })
+
+        const ordertWithPhotoDomain = order.map( (element, index)=> {
+            // console.log(element);
+            return {
+                _id: element._id,
+                address: element.address,
+                idTrackingprice: element.idTracking,
+                paymentStatus: element.paymentStatus,
+                slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
+                slipStatus : element.slipStatus,
+                idCart: element.idCart,
+                idUser: element.idUser,
+
+            }
+        })
+
+        res.status(200).json({ data: ordertWithPhotoDomain});
+    } catch (error) {
+        next(error)
+    }
+}
+
+getAllOrderHaveSlipAndVerifyTrue = async function(req, res ,next){
+    try {
+        // console.log(req.body);
+        order = await Order.find({slipStatus: true, activeStatus: true, verify:true, paymentStatus: true })
 
         const ordertWithPhotoDomain = order.map( (element, index)=> {
             // console.log(element);
@@ -157,7 +184,7 @@ updateSlip = async function(req, res ,next){
             throw error;
         }
 
-        order = await Order.findOneAndUpdate({_id:req.body.idOrder},{slipVerification:img,slipStatus:true,address:req.body.address})
+        order = await Order.findOneAndUpdate({_id:req.body.idOrder},{slipVerification:img,slipStatus:true,address:req.body.address, updateAt:Date.now()});
 
         console.log(order);
         
@@ -209,9 +236,8 @@ function decodeBase64Image(base64Str) {
 
 cancleOrder = async function(req, res ,next){
     try {
-        console.log(req.params.id);
 
-         order = await Order.findOneAndUpdate({_id:req.params.id}, {activeStatus:false}); //อย่าลืมแก้กลับเป็น false
+         order = await Order.findOneAndUpdate({_id:req.params.id}, {activeStatus:false, updateAt: Date.now() }); //อย่าลืมแก้กลับเป็น false
 
         //นำสินค้าที่ยกเลิกบวกจำนวนที่จองกลับไปขายใหม้
         // console.log(order);
@@ -230,6 +256,7 @@ cancleOrder = async function(req, res ,next){
         next(error)
     }
 }
+
 
 getOrderNotActive = async function(req, res ,next){
     try {
@@ -272,6 +299,41 @@ getOrderNotActive = async function(req, res ,next){
     }
 }
 
+verifyPayment = async function(req, res ,next){
+    try {
+
+        console.log(req.body);
+        user = await User.findOne({_id:req.body.idUser})
+        if(user.role !== 'admin'){
+            const error = new Error('ไม่มีสิทธิ์เข้าถึง');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        order = await Order.findOne({_id: req.body.idOrder})
+        if(!order){
+            const error = new Error('ไม่พบรายการสั่งซื้อในการอัพเดรต');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if( req.body.paymentStatus === true){
+            await Order.findOneAndUpdate({_id: req.body.idOrder},{verify:true ,paymentStatus: true});
+            res.status(200).json({ msg: 'verify ---> paymentStatus: true'});
+
+        }else if(req.body.paymentStatus === false){
+            await Order.findOneAndUpdate({_id: req.body.idOrder},{verify:true});
+            res.status(200).json({ msg: 'verify ---> paymentStatus: false!'});
+        }else{
+            const error = new Error('req ไม่ถูกต้อง');
+            error.statusCode = 400;
+            throw error;
+        }
+
+    } catch (error) {
+        next(error)
+    }
+}
 
 module.exports = {
     addOrder,
@@ -281,4 +343,6 @@ module.exports = {
     getAllOrderHaveSlip,
     cancleOrder,
     getOrderNotActive,
+    verifyPayment,
+    getAllOrderHaveSlipAndVerifyTrue
 }
