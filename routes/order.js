@@ -9,6 +9,7 @@ router.put('/getOrderHaveslip',orderController.getOrderHaveSlip);
 router.delete('/cancleOrder/:id',orderController.cancleOrder);
 router.put('/updateSlip',orderController.updateSlip);
 router.get('/getOrderNotActive/:id',orderController.getOrderNotActive);
+router.get('/getOrderDisapprove/:id',orderController.getOrderDisapprove);
 
 //for admin
 router.get('/getAllOrderHaveslip',orderController.getAllOrderHaveSlip);

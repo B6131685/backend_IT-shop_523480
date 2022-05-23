@@ -85,10 +85,38 @@ getOrderNotSlip = async function(req, res ,next){
     }
 }
 
+//user get order have slip that wait to verify
 getOrderHaveSlip = async function(req, res ,next){
     try {
         
-        order = await Order.find({idUser:req.body.idUser,slipStatus: true})
+        order = await Order.find({idUser:req.body.idUser,slipStatus: true, verify:false})
+
+        const ordertWithPhotoDomain = order.map( (element, index)=> {
+            
+            return {
+                _id: element._id,
+                address: element.address,
+                idTrackingprice: element.idTracking,
+                paymentStatus: element.paymentStatus,
+                slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
+                slipStatus : element.slipStatus,
+                idCart: element.idCart,
+                idUser: element.idUser,
+
+            }
+        })
+
+        res.status(200).json({ data: ordertWithPhotoDomain});
+    } catch (error) {
+        next(error)
+    }
+}
+
+//user get order have slip that disapprove
+getOrderDisapprove = async function(req, res ,next){
+    try {
+        console.log(req.params.id);
+        order = await Order.find({idUser:req.params.id,slipStatus: true, verify:true, paymentStatus: false})
 
         const ordertWithPhotoDomain = order.map( (element, index)=> {
             
@@ -344,5 +372,6 @@ module.exports = {
     cancleOrder,
     getOrderNotActive,
     verifyPayment,
-    getAllOrderHaveSlipAndVerifyTrue
+    getAllOrderHaveSlipAndVerifyTrue,
+    getOrderDisapprove
 }
