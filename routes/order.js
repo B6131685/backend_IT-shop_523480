@@ -11,9 +11,13 @@ router.put('/updateSlip',orderController.updateSlip);
 router.get('/getOrderNotActive/:id',orderController.getOrderNotActive);
 router.get('/getOrderDisapprove/:id',orderController.getOrderDisapprove);
 
+//for both
+router.get('/getAllOrderHaveAlreadySend',orderController.getAllOrderHaveAlreadySend);
+
 //for admin
 router.get('/getAllOrderHaveslip',orderController.getAllOrderHaveSlip);
 router.put('/verifyPayment',orderController.verifyPayment);
+router.put('/trackingOrder',orderController.updateIDTracking);
 router.get('/trueVerifyPayment',orderController.getAllOrderHaveSlipAndVerifyTrue);
 
 module.exports = router;

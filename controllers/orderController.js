@@ -164,18 +164,18 @@ getAllOrderHaveSlip = async function(req, res ,next){
         next(error)
     }
 }
-
+ 
 getAllOrderHaveSlipAndVerifyTrue = async function(req, res ,next){
     try {
         // console.log(req.body);
-        order = await Order.find({slipStatus: true, activeStatus: true, verify:true, paymentStatus: true })
+        order = await Order.find({slipStatus: true, activeStatus: true, verify:true, paymentStatus: true , idTracking: "not fill"})
 
         const ordertWithPhotoDomain = order.map( (element, index)=> {
             // console.log(element);
             return {
                 _id: element._id,
                 address: element.address,
-                idTrackingprice: element.idTracking,
+                idTracking: element.idTracking,
                 paymentStatus: element.paymentStatus,
                 slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
                 slipStatus : element.slipStatus,
@@ -186,6 +186,60 @@ getAllOrderHaveSlipAndVerifyTrue = async function(req, res ,next){
         })
 
         res.status(200).json({ data: ordertWithPhotoDomain});
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+getAllOrderHaveAlreadySend = async function(req, res ,next){
+    try {
+        // console.log(req.body);
+        order = await Order.find({slipStatus: true, activeStatus: true, verify:true, paymentStatus: true,idTracking: { $ne: "not fill" } }) //ne = not equal
+
+        const ordertWithPhotoDomain = order.map( (element, index)=> {
+            // console.log(element);
+                return {
+                    _id: element._id,
+                    address: element.address,
+                    idTracking: element.idTracking,
+                    paymentStatus: element.paymentStatus,
+                    slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
+                    slipStatus : element.slipStatus,
+                    idCart: element.idCart,
+                    idUser: element.idUser,
+                    
+                }
+        })
+
+        res.status(200).json({ data: ordertWithPhotoDomain});
+    } catch (error) {
+        next(error)
+    }
+}
+
+updateIDTracking = async function(req, res ,next){
+    try {
+        console.log(req.body.idOrder);
+        
+
+        order = await Order.findOne({_id: req.body.idOrder});
+        if(!order){
+            const error = new Error('ไม่พบรายการสั่งซื้อนี้');
+            error.statusCode = 400;
+            throw error;
+        }
+                     
+        if(!req.body.idTracking){
+            const error = new Error('ไม่ได้รับ idTracking');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        order.idTracking = req.body.idTracking;
+        await order.save();
+
+        res.status(200).json({ data: 'update id tracking success'});
     } catch (error) {
         next(error)
     }
@@ -373,5 +427,7 @@ module.exports = {
     getOrderNotActive,
     verifyPayment,
     getAllOrderHaveSlipAndVerifyTrue,
-    getOrderDisapprove
+    getOrderDisapprove,
+    updateIDTracking,
+    getAllOrderHaveAlreadySend
 }
