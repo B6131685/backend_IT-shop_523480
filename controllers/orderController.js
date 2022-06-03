@@ -89,7 +89,7 @@ getOrderNotSlip = async function(req, res ,next){
 getOrderHaveSlip = async function(req, res ,next){
     try {
         
-        order = await Order.find({idUser:req.body.idUser,slipStatus: true, verify:false})
+        order = await Order.find({idUser:req.body.idUser,slipStatus: true, verify:false,activeStatus:true})
 
         const ordertWithPhotoDomain = order.map( (element, index)=> {
             
@@ -117,23 +117,40 @@ getOrderDisapprove = async function(req, res ,next){
     try {
         console.log(req.params.id);
         order = await Order.find({idUser:req.params.id,slipStatus: true, verify:true, paymentStatus: false})
-
-        const ordertWithPhotoDomain = order.map( (element, index)=> {
-            
-            return {
-                _id: element._id,
-                address: element.address,
-                idTrackingprice: element.idTracking,
-                paymentStatus: element.paymentStatus,
-                slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
-                slipStatus : element.slipStatus,
-                idCart: element.idCart,
-                idUser: element.idUser,
-
+        .populate({
+            path:'idCart',
+            populate: {
+                path: 'list.idProduct',
+                model: 'Product'
             }
-        })
+        }).exec((err, type)=>{
+            if(err){
+                res.status(400).json({
+                    data: err
+                })
+            }
 
-        res.status(200).json({ data: ordertWithPhotoDomain});
+
+            const ordertWithPhotoDomain = type.map( (element, index)=> {
+                // console.log(element);
+                    return {
+                        _id: element._id,
+                        address: element.address,
+                        idTracking: element.idTracking,
+                        paymentStatus: element.paymentStatus,
+                        slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
+                        slipStatus : element.slipStatus,
+                        idCart: element.idCart,
+                        idUser: element.idUser,
+                        updateAt: element.updateAt,
+                        createAt: element.createAt
+                        
+                    }
+            })
+    
+            res.status(200).json({ data: ordertWithPhotoDomain});
+        })
+        
     } catch (error) {
         next(error)
     }
@@ -196,23 +213,42 @@ getAllOrderHaveAlreadySend = async function(req, res ,next){
     try {
         // console.log(req.body);
         order = await Order.find({slipStatus: true, activeStatus: true, verify:true, paymentStatus: true,idTracking: { $ne: "not fill" } }) //ne = not equal
+        .populate({
+            path:'idCart',
+            populate: {
+                path: 'list.idProduct',
+                model: 'Product'
+            }
+        }).exec((err, type)=>{
+            if(err){
+                res.status(400).json({
+                    data: err
+                })
+            }
 
-        const ordertWithPhotoDomain = order.map( (element, index)=> {
-            // console.log(element);
-                return {
-                    _id: element._id,
-                    address: element.address,
-                    idTracking: element.idTracking,
-                    paymentStatus: element.paymentStatus,
-                    slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
-                    slipStatus : element.slipStatus,
-                    idCart: element.idCart,
-                    idUser: element.idUser,
-                    
-                }
+
+            const ordertWithPhotoDomain = type.map( (element, index)=> {
+                // console.log(element);
+                    return {
+                        _id: element._id,
+                        address: element.address,
+                        idTracking: element.idTracking,
+                        paymentStatus: element.paymentStatus,
+                        slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
+                        slipStatus : element.slipStatus,
+                        idCart: element.idCart,
+                        idUser: element.idUser,
+                        updateAt: element.updateAt,
+                        createAt: element.createAt
+                        
+                    }
+            })
+    
+            res.status(200).json({ data: ordertWithPhotoDomain});
         })
 
-        res.status(200).json({ data: ordertWithPhotoDomain});
+
+        
     } catch (error) {
         next(error)
     }
