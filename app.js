@@ -19,6 +19,7 @@ const productRouter = require('./routes/product')
 const shopPageRouter = require('./routes/shopPage')
 const cartRouter = require('./routes/cart')
 const orderRouter = require('./routes/order')
+const paymentRouter = require('./routes/payment')
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use('/product', productRouter);
 app.use('/shopPage', shopPageRouter);
 app.use('/cart', cartRouter);
 app.use('/order', orderRouter);
+app.use('/payment', paymentRouter);
 
 app.use(errorHandler);
 
