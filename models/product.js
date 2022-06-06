@@ -8,7 +8,8 @@ const productSchema = new Schema({
     spec: [],
     img: {type: String, default: 'nopic.png'},
     number: {type: Number, default: 0},
-    date: {type:Date, default: Date.now } 
+    date: {type:Date, default: Date.now },
+    activeStatus: {type:Boolean, default: true}
   },{
       collection: 'products'
   });

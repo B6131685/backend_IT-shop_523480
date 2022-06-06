@@ -108,7 +108,8 @@ exports.getAllProduct = async (req, res, next) => {
                 spec: element.spec,
                 img: "http://localhost:3000"+'/images/'+element.img,
                 number : element.number,
-                date: element.date
+                date: element.date,
+                activeStatus: element.activeStatus
             }
         })
     
@@ -146,7 +147,8 @@ exports.getProductByID = async (req, res, next) => {
                 spec: type.spec,
                 img: "http://localhost:3000"+'/images/'+type.img,
                 number : type.number,
-                date: type.date
+                date: type.date,
+                activeStatus: element.activeStatus
         })
     });
     // console.log(product);
@@ -283,7 +285,7 @@ exports.updateByOne = async (req, res, next) => {
          throw new Error('Not found information ro NOT permission')
      }
  
-     res.status(201).json({
+     res.status(200).json({
          data: { message: "Delete success"}
       })
  
@@ -295,3 +297,23 @@ exports.updateByOne = async (req, res, next) => {
        }) 
     }
  }
+
+
+ 
+
+exports.updateActiveStatus = async (req, res, next) => {
+    try {
+        console.log(req.body);
+
+        const product = await Product.findOne({_id:req.body.idProduct})
+        product.activeStatus = req.body.status
+        await product.save();
+
+        res.status(200).json({
+            data: { message: "update activeStatus"}
+        })
+
+    } catch (error) {
+        next(error)
+    }
+}

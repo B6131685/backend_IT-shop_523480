@@ -8,6 +8,7 @@ router.get('/getallProduct', productController.getAllProduct);
 router.put('/updateProductStock',[paassportJWT.isLogin], productController.updateProductStock);
 router.get('/getProductOne/:_id',[paassportJWT.isLogin], productController.getProductByID);
 router.put('/updateProductOne',[paassportJWT.isLogin], productController.updateByOne);
+router.put('/updateActiveStatus',[paassportJWT.isLogin], productController.updateActiveStatus);
 router.delete('/deleteProduct/:_id',[paassportJWT.isLogin],productController.destroy);
 
 module.exports = router;
