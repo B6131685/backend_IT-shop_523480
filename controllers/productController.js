@@ -148,7 +148,7 @@ exports.getProductByID = async (req, res, next) => {
                 img: "http://localhost:3000"+'/images/'+type.img,
                 number : type.number,
                 date: type.date,
-                activeStatus: element.activeStatus
+                activeStatus: type.activeStatus
         })
     });
     // console.log(product);

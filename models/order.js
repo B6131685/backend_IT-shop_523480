@@ -9,6 +9,7 @@ const orderSchema = new Schema({
     idUser: {type: Schema.Types.ObjectId, ref:user}, // who user
     address: { type: String, default:"not fill"}, // where 
     idTracking: { type: String, default: "not fill"}, // number express to follow product
+    expressCompany:{type: String},
     paymentStatus: { type: Boolean, default: false}, // admin verify slip
     verify: { type: Boolean, default: false},
     slipVerification: {type: String, default: 'nopic.png'}, // slip img

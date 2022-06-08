@@ -11,6 +11,7 @@ const uuidv4 = require('uuid');
 const { promisify } = require('util');
 const e = require('express');
 const { verify } = require('crypto');
+// const order = require('../models/order');
 // const user = require('../models/user');
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
@@ -116,7 +117,7 @@ getOrderHaveSlip = async function(req, res ,next){
 getOrderDisapprove = async function(req, res ,next){
     try {
         console.log(req.params.id);
-        order = await Order.find({idUser:req.params.id,slipStatus: true, verify:true, paymentStatus: false})
+        const order = await Order.find({idUser:req.params.id,slipStatus: true, verify:true, paymentStatus: false})
         .populate({
             path:'idCart',
             populate: {
@@ -156,59 +157,91 @@ getOrderDisapprove = async function(req, res ,next){
     }
 }
 
+//มีสลิป แต่ admin ยังไม่ตรวจสอบ--- สำหรับadmin ดึงทั้งหมดไปตรวจสอบ
 getAllOrderHaveSlip = async function(req, res ,next){
     try {
         // console.log(req.body);
-        order = await Order.find({slipStatus: true, activeStatus: true, verify:false })
+        const order = await Order.find({slipStatus: true, activeStatus: true, verify:false })
+        console.log(typeof order);
+        console.log(order.length);
 
-        const ordertWithPhotoDomain = order.map( (element, index)=> {
-            // console.log(element);
-            return {
-                _id: element._id,
-                address: element.address,
-                idTrackingprice: element.idTracking,
-                paymentStatus: element.paymentStatus,
-                slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
-                slipStatus : element.slipStatus,
-                idCart: element.idCart,
-                idUser: element.idUser,
+        let ordertWithPhotoDomain = [];
+        for (let index = 0; index < order.length; index++) {
 
-            }
-        })
+            ordertWithPhotoDomain.push({
+                _id: order[index]._id,
+                address: order[index].address,
+                idTrackingprice: order[index].idTracking,
+                paymentStatus: order[index].paymentStatus,
+                slipVerification: "http://localhost:3000"+'/images/'+order[index].slipVerification,
+                slipStatus : order[index].slipStatus,
+                idCart: order[index].idCart,
+                idUser: order[index].idUser,
+            });
+        }
 
-        res.status(200).json({ data: ordertWithPhotoDomain});
+       res.status(200).json({ data: ordertWithPhotoDomain});
+    
     } catch (error) {
         next(error)
     }
 }
  
+//ดึง order ที่ตรวจแล้วไปใส่ค่า ID tracking และ บริษัทขนส่ง
 getAllOrderHaveSlipAndVerifyTrue = async function(req, res ,next){
     try {
         // console.log(req.body);
-        order = await Order.find({slipStatus: true, activeStatus: true, verify:true, paymentStatus: true , idTracking: "not fill"})
-
-        const ordertWithPhotoDomain = order.map( (element, index)=> {
-            // console.log(element);
-            return {
-                _id: element._id,
-                address: element.address,
-                idTracking: element.idTracking,
-                paymentStatus: element.paymentStatus,
-                slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
-                slipStatus : element.slipStatus,
-                idCart: element.idCart,
-                idUser: element.idUser,
-
+        const order = await Order.find({slipStatus: true, activeStatus: true, verify:true, paymentStatus: true , idTracking: "not fill"})
+        .populate('idUser')
+        .exec((err, type)=>{
+            if(err){
+                res.status(400).json({
+                    data: err
+                })
             }
-        })
 
-        res.status(200).json({ data: ordertWithPhotoDomain});
+
+        
+            const ordertWithPhotoDomain = type.map( (element, index)=> {
+                // console.log(element);
+                return {
+                    _id: element._id,
+                    address: element.address,
+                    idTracking: element.idTracking,
+                    paymentStatus: element.paymentStatus,
+                    slipVerification: "http://localhost:3000"+'/images/'+element.slipVerification,
+                    slipStatus : element.slipStatus,
+                    idCart: element.idCart,
+                    idUser: element.idUser,
+    
+                }
+            })
+
+            res.status(200).json({
+                data: ordertWithPhotoDomain
+            })
+            
+            // res.status(200).json({
+            
+            //         _id: type._id,
+            //         address: type.address,
+            //         idTracking: type.idTracking,
+            //         paymentStatus: type.paymentStatus,
+            //         slipVerification: "http://localhost:3000"+'/images/'+type.slipVerification,
+            //         slipStatus : type.slipStatus,
+            //         idCart: type.idCart,
+            //         idUser: type.idUser
+            // })
+        
+        })
+        // console.log(order);
+        // res.status(200).json({ msg: 'test API'});
     } catch (error) {
         next(error)
     }
 }
 
-
+// 
 getAllOrderHaveAlreadySend = async function(req, res ,next){
     try {
         // console.log(req.body);
@@ -219,15 +252,16 @@ getAllOrderHaveAlreadySend = async function(req, res ,next){
                 path: 'list.idProduct',
                 model: 'Product'
             }
-        }).exec((err, type)=>{
+        }).
+        populate('idUser')
+        .exec((err, type)=>{
             if(err){
                 res.status(400).json({
                     data: err
                 })
             }
 
-
-            const ordertWithPhotoDomain = type.map( (element, index)=> {
+            const ordertWithPhotoDomain = type.map((element, index)=> {
                 // console.log(element);
                     return {
                         _id: element._id,
@@ -239,12 +273,32 @@ getAllOrderHaveAlreadySend = async function(req, res ,next){
                         idCart: element.idCart,
                         idUser: element.idUser,
                         updateAt: element.updateAt,
-                        createAt: element.createAt
+                        createAt: element.createAt,
+                        expressCompany: element.expressCompany
                         
                     }
             })
+
+            res.status(200).json({
+                data: ordertWithPhotoDomain
+            })
+
+        //     res.status(200).json({
+            
+        //                 id: type._id,
+        //                 address: type.address,
+        //                 idTracking: type.idTracking,
+        //                 paymentStatus: type.paymentStatus,
+        //                 slipVerification: "http://localhost:3000"+'/images/'+type.slipVerification,
+        //                 slipStatus : type.slipStatus,
+        //                 idCart: type.idCart,
+        //                 idUser: type.idUser,
+        //                 updateAt: type.updateAt,
+        //                 createAt: type.createAt,
+        //                 expressCompany: type.expressCompany
+        // })
     
-            res.status(200).json({ data: ordertWithPhotoDomain});
+            
         })
 
 
@@ -256,10 +310,10 @@ getAllOrderHaveAlreadySend = async function(req, res ,next){
 
 updateIDTracking = async function(req, res ,next){
     try {
-        console.log(req.body.idOrder);
+        console.log(req.body);
         
 
-        order = await Order.findOne({_id: req.body.idOrder});
+        const order = await Order.findOne({_id: req.body.idOrder});
         if(!order){
             const error = new Error('ไม่พบรายการสั่งซื้อนี้');
             error.statusCode = 400;
@@ -272,7 +326,15 @@ updateIDTracking = async function(req, res ,next){
             throw error;
         }
 
+        if(!req.body.expressCompany){
+            const error = new Error('ไม่ได้รับชื่อบริษัทขนส่ง');
+            error.statusCode = 400;
+            throw error;
+        }
+
         order.idTracking = req.body.idTracking;
+        order.expressCompany = req.body.expressCompany;
+        order.updateAt = Date.now()
         await order.save();
 
         res.status(200).json({ data: 'update id tracking success'});
