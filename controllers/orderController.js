@@ -193,6 +193,13 @@ getAllOrderHaveSlipAndVerifyTrue = async function(req, res ,next){
         // console.log(req.body);
         const order = await Order.find({slipStatus: true, activeStatus: true, verify:true, paymentStatus: true , idTracking: "not fill"})
         .populate('idUser')
+        .populate({
+            path:'idCart',
+            populate: {
+                path: 'list.idProduct',
+                model: 'Product'
+            }
+        })
         .exec((err, type)=>{
             if(err){
                 res.status(400).json({
