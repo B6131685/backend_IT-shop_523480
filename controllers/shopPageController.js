@@ -169,7 +169,10 @@ exports.destroy = async (req, res, next) => {
 
     data.nameShop = req.body.newName;
     data.shipping = req.body.shipping;
-    data.cost_shipping = req.body.cost_shipping;    
+    data.cost_shipping = req.body.cost_shipping;   
+    data.mail =  req.body.mail;
+    data.address = req.body.address;
+    data.tel = req.body.tel;
     let result = await data.save();
 
     res.status(201).json({
