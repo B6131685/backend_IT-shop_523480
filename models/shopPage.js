@@ -10,6 +10,7 @@ const shopPagesSchema = new Schema({
     tel: {type:String},
     mail: {type:String},
     address: {type:String},
+    logo:{type:String}
   },{
       collection: 'shopPages'
   });

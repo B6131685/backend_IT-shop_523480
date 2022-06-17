@@ -438,7 +438,7 @@ cancleOrder = async function(req, res ,next){
         }
 
         
-        res.status(200).json({ mag : 'cancle order success'});
+        res.status(200).json({ msg : 'cancle order success'});
     } catch (error) {
         next(error)
     }
