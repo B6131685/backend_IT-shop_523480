@@ -37,6 +37,12 @@ exports.getshopPage = async (req, res, next) => {
             data.img[index] = "http://localhost:3000"+'/images/'+data.img[index];
         }
     }
+
+    if(data.logo){
+        data.logo = "http://localhost:3000"+'/images/'+data.logo
+    }
+
+
     res.status(200).json({ data: data});
     } catch (error) {
       next(error);  
@@ -173,6 +179,9 @@ exports.destroy = async (req, res, next) => {
     data.mail =  req.body.mail;
     data.address = req.body.address;
     data.tel = req.body.tel;
+    
+    let logoname = await saveImageToDisk(req.body.logo);
+    data.logo = logoname;
     let result = await data.save();
 
     res.status(201).json({
