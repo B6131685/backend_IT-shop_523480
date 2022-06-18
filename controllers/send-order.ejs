@@ -1,0 +1,19 @@
+<div>
+    <h2>จัดส่งสินค้าเรียบร้อย</h2>
+    <p><h3>เราได้จัดส่งสินค้าของสมาชิก: <%= user.name %></h3></p>
+    <p><h3>ที่อยู่รับสินค้า <%= order.address %></h3></p>
+    <p><h3>บริษัทจัดส่ง: <%= order.expressCompany %> </h3></p>
+    <p><h3>ID Tracking:<%= order.idTracking %></h3></p>
+    <div>
+        <h3>รายการสินค้าจัดส่ง</h3>
+        <ul>
+            <% for(var i=0; i < cart.list.length; i++) 
+                { %>
+                    <li>
+                      <td><%= cart.list[i].idProduct.spec[0].value %> จำนวน <%= cart.list[i].quantity %> </td>
+                    </li>
+                <% } 
+             %>
+        </ul>
+    </div>
+</div>

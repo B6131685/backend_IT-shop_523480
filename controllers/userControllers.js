@@ -24,8 +24,6 @@ register = async function(req, res, next){
 
     try {
 
-        
-
         // validation    
         const errors = validationResult(req);
         //console.log(errors.array());

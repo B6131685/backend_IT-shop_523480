@@ -3,6 +3,11 @@ const Order = require('../models/order');
 const User = require('../models/user');
 const Cart = require('../models/carts');
 const Product = require('../models/product');
+const shopPage = require('../models/shopPage')
+
+//send mail
+const nodemailer = require('nodemailer');
+const ejs = require("ejs");
 
 //for write image
 const fs = require('fs');
@@ -15,6 +20,21 @@ const { verify } = require('crypto');
 // const user = require('../models/user');
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
+
+
+const transport = nodemailer.createTransport( {
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    service: "gmail",
+    auth: {
+        user: "wolfsuperdog77@gmail.com",
+        pass: "fujaaodfujwpntbp"
+    }
+});
+
+
 
 addOrder = async function(req, res ,next){
     try {
@@ -227,22 +247,9 @@ getAllOrderHaveSlipAndVerifyTrue = async function(req, res ,next){
             res.status(200).json({
                 data: ordertWithPhotoDomain
             })
-            
-            // res.status(200).json({
-            
-            //         _id: type._id,
-            //         address: type.address,
-            //         idTracking: type.idTracking,
-            //         paymentStatus: type.paymentStatus,
-            //         slipVerification: "http://localhost:3000"+'/images/'+type.slipVerification,
-            //         slipStatus : type.slipStatus,
-            //         idCart: type.idCart,
-            //         idUser: type.idUser
-            // })
         
         })
-        // console.log(order);
-        // res.status(200).json({ msg: 'test API'});
+
     } catch (error) {
         next(error)
     }
@@ -289,27 +296,8 @@ getAllOrderHaveAlreadySend = async function(req, res ,next){
             res.status(200).json({
                 data: ordertWithPhotoDomain
             })
-
-        //     res.status(200).json({
-            
-        //                 id: type._id,
-        //                 address: type.address,
-        //                 idTracking: type.idTracking,
-        //                 paymentStatus: type.paymentStatus,
-        //                 slipVerification: "http://localhost:3000"+'/images/'+type.slipVerification,
-        //                 slipStatus : type.slipStatus,
-        //                 idCart: type.idCart,
-        //                 idUser: type.idUser,
-        //                 updateAt: type.updateAt,
-        //                 createAt: type.createAt,
-        //                 expressCompany: type.expressCompany
-        // })
-    
-            
         })
 
-
-        
     } catch (error) {
         next(error)
     }
@@ -344,7 +332,42 @@ updateIDTracking = async function(req, res ,next){
         order.updateAt = Date.now()
         await order.save();
 
-        res.status(200).json({ data: 'update id tracking success'});
+        const shoppage = await shopPage.findOne();
+        console.log('order = ');
+        console.log(order);
+        const user = await User.findOne({_id:order.idUser});
+        const cart = await Cart.findOne({_id:order.idCart})
+        .populate({
+            path: 'list.idProduct',
+            model: 'Product'
+        })
+        console.log('cart = ');
+        console.log(cart);
+        
+        const SendOrderMail = await ejs.renderFile(__dirname+'/send-order.ejs', {user:user, cart:cart, order:order});
+    
+
+        let options = {
+            from: shoppage.nameShop+' <foo@example.com>',
+            to: "",
+            subject: "แจ้งเตือนการจัดส่งสินค้า",
+            html: SendOrderMail
+        }
+        options.to = user.email;
+
+        transport.sendMail(options, (err, info)=>{
+            if(err){
+                console.log(err);
+                const error = new Error('การส่งเมลเกิดข้อผิดพลาด');
+                error.statusCode = 400;
+                throw error;
+            }
+        })
+       
+       
+        
+
+        res.status(200).json({ data: cart});
     } catch (error) {
         next(error)
     }
@@ -436,7 +459,6 @@ cancleOrder = async function(req, res ,next){
              product.number += cart.list[index].quantity;
              await product.save();
         }
-
         
         res.status(200).json({ msg : 'cancle order success'});
     } catch (error) {
@@ -472,8 +494,6 @@ getOrderNotActive = async function(req, res ,next){
                     data:type
                 })
             });
-
-
 
             // res.status(200).json({ data : order});
         }else{
