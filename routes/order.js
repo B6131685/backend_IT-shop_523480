@@ -10,6 +10,7 @@ router.delete('/cancleOrder/:id',orderController.cancleOrder);
 router.put('/updateSlip',orderController.updateSlip);
 router.get('/getOrderNotActive/:id',orderController.getOrderNotActive);
 router.get('/getOrderDisapprove/:id',orderController.getOrderDisapprove);
+router.get('/orderPDF/:id',orderController.orderPDF);
 
 //for both
 router.get('/getAllOrderHaveAlreadySend',orderController.getAllOrderHaveAlreadySend);

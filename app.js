@@ -23,8 +23,14 @@ const paymentRouter = require('./routes/payment')
 
 const app = express();
 
+//new add
+const cors = require('cors')
+
 //connect mongoose
 mongoose.connect('mongodb://localhost:27017/ITShop');
+
+
+
 
 app.use(logger('dev'));
 app.use(express.json(
@@ -35,12 +41,15 @@ app.use(express.json(
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use((req,res,next)=>{
-    res.setHeader('Access-Control-Allow-Origin','http://localhost:4200')
-    res.setHeader('Access-Control-Allow-Methods','POST,GET,PUT,PATCH,DELETE,OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers','Content-Type,Option,Authorization')
-    return next()
-})
+// app.use((req,res,next)=>{
+//     res.setHeader('Access-Control-Allow-Origin','http://localhost:4200')
+//     res.setHeader('Access-Control-Allow-Methods','POST,GET,PUT,PATCH,DELETE,OPTIONS')
+//     res.setHeader('Access-Control-Allow-Headers','Content-Type,Option,Authorization')
+//     return next()
+// })
+
+app.use(cors());
+
 
 
 //init passport

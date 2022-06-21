@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <link rel="stylesheet" href="style1.css" type="text/css"> -->
+    <style>
+        table, td, th {
+            border: 1px solid black;
+        }
+  
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+    </style>
+
+</head>
+<body>
+    <div>
+        <h2>ใบกำกับสินค้า  </h2>
+        <h3>รหัสสั่งขาย: <%= order._id %></h3>
+        <h3>วันที่: <%= day.updateAt %></h3>
+    </div>
+    <div style="width: 100%;">
+        <div style="display:inline-block;width:30%;text-align: center;">
+            <img src='http://localhost:3000/images/logo.png' style="width: 150px;">
+        </div>
+        <div style="display:inline-block;">
+            <div style="font-size: 20px;font-weight:bold">บริษัท: <%= shop_page.nameShop %></ก>
+            <div style="font-size: 20px;font-weight:bold;width: 450px;">ที่อยู่: <%= shop_page.address %></div>
+            <div style="font-size: 20px;font-weight:bold">โทร: <%= shop_page.tel %></div>
+            <div style="font-size: 20px;font-weight:bold">mail: <%= shop_page.mail %></div>
+        </div>
+    </div>
+    <div style="margin-top: 40px;">
+        <h3>ลูกค้า: <%= user.name %></h3>
+    </div>
+    <div>
+        <h3>รายการสินค้า</h3>
+    </div>
+    <div style="display: center;">
+        <table>
+            <tr>
+              <th>No.</th>
+              <th>สินค้า</th>
+              <th>จำนวน</th>
+              <th>จำนวนเงิน</th> 
+              <th>หน่วย</th>
+            </tr>
+
+            <% for(var i=0; i < cart.list.length; i++) 
+                { %>
+                    <tr>
+                        <td style="text-align: center;"> <%= i+1 %> </td>
+                        <td style="padding: 15px;"> <%= cart.list[i].idProduct.spec[0].value %> </td>
+                        <td style="text-align: center;"> <%= cart.list[i].quantity %> </td>
+                        <td style="text-align: right;padding: 10px;"> <%= cart.list[i].quantity * cart.list[i].idProduct.price %> </td>
+                        <td style="text-align: center;">บาท</td>
+                    </tr>
+                <% } 
+            %>
+            <tr>
+                <td colspan="3" style="border-top: none;padding-left: 15px;">
+                    ค่าจัดส่ง
+                </td>
+                <td style="text-align: right;padding: 10px;">
+                    <%= amount.shipping %>
+                </td>
+                <td style="text-align: center;">บาท</td>
+            </tr>
+            <tr>
+                <td colspan="3" style="border-top: none;padding-left: 15px;">
+                    จำนวนเงินทั้งสิ้น
+                </td>
+                <td style="text-align: right;padding: 10px;">
+                    <%= amount.sum + amount.shipping %>
+                </td>
+                <td style="text-align: center;">บาท</td>
+            </tr>
+          </table>
+    </div>
+</body>
+</html>

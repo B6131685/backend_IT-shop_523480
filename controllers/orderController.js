@@ -9,6 +9,11 @@ const shopPage = require('../models/shopPage')
 const nodemailer = require('nodemailer');
 const ejs = require("ejs");
 
+//PDF
+const html_to_pdf = require('html-pdf-node');
+// const dateFormat = require('dateformat');
+const date_and_time = require('date-and-time');
+
 //for write image
 const fs = require('fs');
 const path = require('path');
@@ -29,8 +34,8 @@ const transport = nodemailer.createTransport( {
     requireTLS: true,
     service: "gmail",
     auth: {
-        user: "wolfsuperdog77@gmail.com",
-        pass: "fujaaodfujwpntbp"
+        user: "ITshopProject@gmail.com",
+        pass: "vlwzvpjhoynoojgc"
     }
 });
 
@@ -305,7 +310,7 @@ getAllOrderHaveAlreadySend = async function(req, res ,next){
 
 updateIDTracking = async function(req, res ,next){
     try {
-        console.log(req.body);
+        // console.log(req.body);
         
 
         const order = await Order.findOne({_id: req.body.idOrder});
@@ -330,7 +335,7 @@ updateIDTracking = async function(req, res ,next){
         order.idTracking = req.body.idTracking;
         order.expressCompany = req.body.expressCompany;
         order.updateAt = Date.now()
-        await order.save();
+        //await order.save();
 
         const shoppage = await shopPage.findOne();
         console.log('order = ');
@@ -341,8 +346,8 @@ updateIDTracking = async function(req, res ,next){
             path: 'list.idProduct',
             model: 'Product'
         })
-        console.log('cart = ');
-        console.log(cart);
+        // console.log('cart = ');
+        // console.log(cart);
         
         const SendOrderMail = await ejs.renderFile(__dirname+'/send-order.ejs', {user:user, cart:cart, order:order});
     
@@ -364,9 +369,6 @@ updateIDTracking = async function(req, res ,next){
             }
         })
        
-       
-        
-
         res.status(200).json({ data: cart});
     } catch (error) {
         next(error)
@@ -393,10 +395,33 @@ updateSlip = async function(req, res ,next){
             error.statusCode = 400;
             throw error;
         }
+        const shoppage = await shopPage.findOne();
+        const admin = await User.find({role:'admin'});
 
-        order = await Order.findOneAndUpdate({_id:req.body.idOrder},{slipVerification:img,slipStatus:true,address:req.body.address, updateAt:Date.now()});
+        const order = await Order.findOneAndUpdate({_id:req.body.idOrder},{slipVerification:img,slipStatus:true,address:req.body.address, updateAt:Date.now()});
 
-        console.log(order);
+        const SendOrderMail = await ejs.renderFile(__dirname+'/notify-admin-order.ejs', {shoppage:shoppage});
+            let options = {
+                from: shoppage.nameShop+' <foo@example.com>',
+                to: "",
+                subject: "แจ้งเตือนการมีคำสั่งซื้อใหม่",
+                html: SendOrderMail
+        }
+
+        for(let index = 0; index < admin.length; index++) {
+            console.log(admin[index].email);
+            options.to = admin[index].email;
+
+            transport.sendMail(options, (err, info)=>{
+                if(err){
+                    console.log(err);
+                    const error = new Error('การส่งเมลเกิดข้อผิดพลาด');
+                    error.statusCode = 400;
+                    throw error;
+                }
+            })
+        }
+        
         
         res.status(200).json({ mag : 'update slip success'});
     } catch (error) {
@@ -447,11 +472,11 @@ function decodeBase64Image(base64Str) {
 cancleOrder = async function(req, res ,next){
     try {
 
-         order = await Order.findOneAndUpdate({_id:req.params.id}, {activeStatus:false, updateAt: Date.now() }); //อย่าลืมแก้กลับเป็น false
+        const order = await Order.findOneAndUpdate({_id:req.params.id}, {activeStatus:false, updateAt: Date.now() }); //อย่าลืมแก้กลับเป็น false
 
         //นำสินค้าที่ยกเลิกบวกจำนวนที่จองกลับไปขายใหม้
         // console.log(order);
-        cart = await Cart.findOne({_id:order.idCart})
+        const cart = await Cart.findOne({_id:order.idCart})
         // console.log(cart);
 
         for (let index = 0; index < cart.list.length; index++) {
@@ -466,15 +491,14 @@ cancleOrder = async function(req, res ,next){
     }
 }
 
-
 getOrderNotActive = async function(req, res ,next){
     try {
         console.log(req.params.id);
-        user = await User.findOne({_id:req.params.id})
+        const user = await User.findOne({_id:req.params.id})
         // console.log(user);
 
         if(user.role === 'customer'){
-            order = await Order.find({idUser:req.params.id,activeStatus:false})
+            const order = await Order.find({idUser:req.params.id,activeStatus:false})
             .populate({
                 path: 'idCart',
                 populate: {
@@ -510,14 +534,14 @@ verifyPayment = async function(req, res ,next){
     try {
 
         console.log(req.body);
-        user = await User.findOne({_id:req.body.idUser})
+        const user = await User.findOne({_id:req.body.idUser})
         if(user.role !== 'admin'){
             const error = new Error('ไม่มีสิทธิ์เข้าถึง');
             error.statusCode = 400;
             throw error;
         }
 
-        order = await Order.findOne({_id: req.body.idOrder})
+        const order = await Order.findOne({_id: req.body.idOrder})
         if(!order){
             const error = new Error('ไม่พบรายการสั่งซื้อในการอัพเดรต');
             error.statusCode = 400;
@@ -538,7 +562,75 @@ verifyPayment = async function(req, res ,next){
         }
 
     } catch (error) {
-        next(error)
+        next(error);
+    }
+}
+
+
+orderPDF = async function(req, res ,next){
+    try {
+        // console.log(req.params.id);
+        order_id = req.params.id
+
+        let options = { 
+            format: 'A4',
+            margin: { top:25, left:15, right:15, bottom: 20} 
+        };
+        const shop_page = await shopPage.findOne();
+        const order = await Order.findOne({_id:order_id});
+        const user = await User.findOne({_id:order.idUser});
+        const cart = await Cart.findOne({_id:order.idCart})
+        .populate({
+            path: 'list.idProduct',
+            model: 'Product'
+        })
+
+        let amount = { sum: 0 , shipping: 0}
+        for (let index = 0; index < cart.list.length; index++) {
+            amount.sum += cart.list[index].quantity * cart.list[index].idProduct.price
+        }
+        if(amount.sum >= shop_page.shipping){
+            amount.shipping = 0
+        }else{
+            amount.shipping = shop_page.shipping
+        }
+        const day = { updateAt: 'null'}
+        day.updateAt = date_and_time.format(order.updateAt,'YYYY/MM/DD HH:mm:ss');
+        // console.log(typeof order.updateAt);
+        // console.log( shop_page.updateAt);
+        const ejsHTML = await ejs.renderFile(
+            __dirname+'/order-appove.ejs',
+            {
+                shop_page:shop_page,
+                order:order,
+                user:user,
+                cart:cart,
+                amount:amount,
+                day:day
+            })
+        let file = { content: ejsHTML };
+
+        html_to_pdf
+            .generatePdf(file, options)
+            .then( async (pdfBuffer) => {
+
+                // res.setHeader('Content-Type', 'application/pdf');
+                // res.setHeader('Content-Disposition', 'attachment; filename=quote.pdf')
+                // .end(pdfBuffer);
+
+                //หา path จริงของโปรเจค
+                const projectPath = path.resolve('./') ;
+                //โฟลเดอร์และ path ของการอัปโหลด
+                const uploadPath = `${projectPath}/public/pdfs/`;
+
+                //เขียนไฟล์ไปไว้ที่ path
+                await writeFileAsync(uploadPath+order._id+'.pdf', pdfBuffer, 'utf-8');
+
+        });
+        
+        res.status(200).json({msg:'orderPDF'});
+    } catch (error) {
+        next(error);
     }
 }
 
@@ -554,5 +646,6 @@ module.exports = {
     getAllOrderHaveSlipAndVerifyTrue,
     getOrderDisapprove,
     updateIDTracking,
-    getAllOrderHaveAlreadySend
+    getAllOrderHaveAlreadySend,
+    orderPDF
 }
