@@ -335,7 +335,7 @@ updateIDTracking = async function(req, res ,next){
         order.idTracking = req.body.idTracking;
         order.expressCompany = req.body.expressCompany;
         order.updateAt = Date.now()
-        //await order.save();
+        await order.save();
 
         const shoppage = await shopPage.findOne();
         console.log('order = ');
@@ -550,6 +550,8 @@ verifyPayment = async function(req, res ,next){
 
         if( req.body.paymentStatus === true){
             await Order.findOneAndUpdate({_id: req.body.idOrder},{verify:true ,paymentStatus: true});
+
+            await createPDF(req.body.idOrder);
             res.status(200).json({ msg: 'verify ---> paymentStatus: true'});
 
         }else if(req.body.paymentStatus === false){
@@ -567,10 +569,11 @@ verifyPayment = async function(req, res ,next){
 }
 
 
-orderPDF = async function(req, res ,next){
-    try {
+// orderPDF = async function(req, res ,next){
+async function createPDF(IDstr) {
+    
         // console.log(req.params.id);
-        order_id = req.params.id
+        order_id = IDstr;
 
         let options = { 
             format: 'A4',
@@ -628,10 +631,8 @@ orderPDF = async function(req, res ,next){
 
         });
         
-        res.status(200).json({msg:'orderPDF'});
-    } catch (error) {
-        next(error);
-    }
+        // res.status(200).json({msg:'orderPDF'});
+        
 }
 
 module.exports = {
@@ -647,5 +648,4 @@ module.exports = {
     getOrderDisapprove,
     updateIDTracking,
     getAllOrderHaveAlreadySend,
-    orderPDF
 }
