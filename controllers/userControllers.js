@@ -13,8 +13,8 @@ const transport = nodemailer.createTransport( {
     requireTLS: true,
     service: "gmail",
     auth: {
-        user: "wolfsuperdog77@gmail.com",
-        pass: "fujaaodfujwpntbp"
+        user: "ITshopProject@gmail.com",
+        pass: "vlwzvpjhoynoojgc"
     }
 });
 
@@ -39,7 +39,7 @@ register = async function(req, res, next){
         const existEmail = await User.findOne({email:req.body.email})
         if(existEmail){
             
-            const error = new Error('อีเมล์ซ้ำ มีผู้ใช้งานแล้ว ลองใหม้อีกครั้ง');
+            const error = new Error('อีเมล์ซ้ำ มีผู้ใช้งานแล้ว ลองใหม่อีกครั้ง');
             error.statusCode = 400;
             throw error;
         }
@@ -286,7 +286,7 @@ forgotPassword = async function(req, res, next){
         user = await User.findOne({email:req.body.email})
 
         if(!user){
-                const error = new Error('อีเมลนี้ยังไม่ได้เป็นสมาชิก');
+                const error = new Error('อีเมลนี้ยังไม่ได้ลงทะเบียน');
                 error.statusCode = 400;
                 throw error;
         }

@@ -28,7 +28,7 @@ exports.verifyUser = async function(req, res ,next){
                 throw error;
             }
 
-            let data = await Verification.deleteOne({_id:existVerification._id.toString()});
+            let data = await Verification.deleteOne({_id:existVerification._id});
             if(!data){
                 console.log("หลังจากการยืนยันอีเมลของสมาชิกได้ถูกยืนยัน แต่ไม่สามารถลบข้อมูล verification ของสามารถชิกได้ได้ ");
             }
