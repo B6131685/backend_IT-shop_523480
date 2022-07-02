@@ -49,13 +49,13 @@ exports.verifyNewEmail = async function(req, res ,next){
         // console.log(req.params.uniqueString);
         verify = await Verification.findOne({uniqueString:req.params.uniqueString});
         // console.log(verify);
-        user = await User.findOne({_id:verify.userID});
+        const user = await User.findOne({_id:verify.userID});
         console.log(user);
         user.email = verify.email;
         await user.save();
 
         await Verification.deleteOne({uniqueString:req.params.uniqueString});
-        res.status(200).json({ msg: 'verify NewEmail success'});
+        res.sendFile(path.join(__dirname,"./../views/verifyNewEmail.html"));
     } catch (error) {
         next(error)
     }

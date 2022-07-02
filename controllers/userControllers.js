@@ -187,9 +187,19 @@ editProfile = async function(req, res, next){
 
 changeEmail = async function(req, res, next){
     try {
-        // console.log('change email working');
-
+        console.log('change email working');
+        console.log(req.body);
         // console.log(req.body); //{email:'', UserID:''}
+        console.log(validationResult(req));
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            const error = new Error(errors.array()[0].msg); //ส่งไปทีละอัน
+            error.statusCode = 422;
+            error.validation = errors.array();
+            throw error;
+        }
+
+        
         uniqueString = uuidv4.v4();
 
         let verify = new Verification();
@@ -197,7 +207,6 @@ changeEmail = async function(req, res, next){
         verify.uniqueString = uniqueString;
         verify.email = req.body.email
         
-        // let aftersave = await verify.save();
         let options = {
             from: "wolfsuperdog77@gmail.com",
             to: "",
@@ -217,7 +226,7 @@ changeEmail = async function(req, res, next){
             }
         })
 
-        let aftersaveverify = await verify.save()
+        await verify.save();
         res.status(200).json({ msg: 'send verify new Email'});
     } catch (error) {
         next(error)
